@@ -81,11 +81,17 @@ pub fn scan_weather_stations(file_path: &str) -> HashMap<String, WeatherStation>
 pub fn print_stations(stations: &HashMap<String, WeatherStation>){
     let mut stations_vec = stations.into_iter().collect::<Vec<_>>();
     stations_vec.sort_unstable_by_key(|p| p.0);
+    let mut is_first = true;
     print!("{{");
     for (station_name, data) in stations_vec {
-        println!("{station_name}: {:.1}/{:.1}/{:.1}", data.min, data.get_mean(), data.max);
-    }
-    println!("}}");
+            if is_first {
+                print!("{station_name}={:.1}/{:.1}/{:.1}", data.min, data.get_mean(), data.max);
+                is_first = false;
+            } else {
+                print!(", {station_name}={:.1}/{:.1}/{:.1}", data.min, data.get_mean(), data.max);
+            }
+        }
+    print!("}}\n");
 }
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
