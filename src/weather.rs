@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
@@ -50,8 +50,8 @@ impl Default for WeatherStation {
     }
 }
 
-pub fn scan_weather_stations(file_path: &str) -> BTreeMap<String, WeatherStation> {
-    let mut weather_stations: BTreeMap<String, WeatherStation> = BTreeMap::new();
+pub fn scan_weather_stations(file_path: &str) -> HashMap<String, WeatherStation> {
+    let mut weather_stations: HashMap<String, WeatherStation> = HashMap::new();
     // let weather_stations: Vec<WeatherStation> = Vec::new();
     log::debug!("Scanning file: {file_path}");
     if let Ok(lines) = read_lines(file_path) {
@@ -66,7 +66,7 @@ pub fn scan_weather_stations(file_path: &str) -> BTreeMap<String, WeatherStation
                     continue;
                 }
             };
-            // Add data to BTreeMap
+            // Add data to HashMap
             let temp = temp.parse::<Temp>().unwrap();
             if !weather_stations.contains_key(station_name) {
                 weather_stations.insert(station_name.to_string(), WeatherStation::new(temp) );
@@ -78,7 +78,7 @@ pub fn scan_weather_stations(file_path: &str) -> BTreeMap<String, WeatherStation
     weather_stations
 }
 
-pub fn print_stations(stations: &BTreeMap<String, WeatherStation>){
+pub fn print_stations(stations: &HashMap<String, WeatherStation>){
     let mut stations_vec = stations.into_iter().collect::<Vec<_>>();
     stations_vec.sort_unstable_by_key(|p| p.0);
     print!("{{");
