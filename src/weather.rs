@@ -61,7 +61,14 @@ pub fn scan_weather_stations(input: &String) -> BTreeMap<String, WeatherStation>
     let mut weather_stations: BTreeMap<String, WeatherStation> = BTreeMap::new();
     // let weather_stations: Vec<WeatherStation> = Vec::new();
     for line in input.lines().into_iter() {
-        let (station_name, temp) = line.split_once(";").unwrap();
+        let split = line.split_once(";");
+        let (station_name, temp) = match split {
+            Some( (station_name, temp) ) => (station_name, temp),
+            None => {
+                log::debug!("Skipping line, improper line format ({line}).");
+                continue;
+            }
+        };
         let temp = temp.parse::<Temp>().unwrap();
         if !weather_stations.contains_key(station_name) {
             weather_stations.insert(station_name.to_string(), WeatherStation::new(station_name, temp) );
