@@ -8,7 +8,6 @@ type Temp = f32;
 #[derive(PartialEq)]
 #[derive(Debug)]
 pub struct WeatherStation {
-    station_name: String,
     min: Temp,
     max: Temp,
     mean: Temp,
@@ -17,9 +16,8 @@ pub struct WeatherStation {
 }
 
 impl WeatherStation {
-    pub fn new(station_name: &str, temp: Temp) -> WeatherStation {
+    pub fn new(temp: Temp) -> WeatherStation {
         WeatherStation {
-            station_name: station_name.to_string(),
             min: temp,
             max: temp,
             mean: temp,
@@ -31,7 +29,6 @@ impl WeatherStation {
     pub fn add_temp(&mut self, temp: Temp) {
         self.min = f32::min(self.min, temp);
         self.max = f32::max(self.max, temp);
-        self.mean = (self.mean + temp) / 2_f32;
         self.sum += temp;
         self.count += 1;
     }
@@ -44,19 +41,12 @@ impl WeatherStation {
 impl Default for WeatherStation {
     fn default() -> WeatherStation {
         WeatherStation {
-            station_name: String::new(),
             min: 0.0,
             max: 0.0,
             mean: 0.0,
             sum: 0.0,
             count: 0
         }
-    }
-}
-
-impl std::fmt::Display for WeatherStation {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}={:.1}/{:.1}/{:.1}", self.station_name, self.min, self.get_mean(), self.max)
     }
 }
 
@@ -79,26 +69,21 @@ pub fn scan_weather_stations(file_path: &str) -> BTreeMap<String, WeatherStation
             // Add data to BTreeMap
             let temp = temp.parse::<Temp>().unwrap();
             if !weather_stations.contains_key(station_name) {
-                weather_stations.insert(station_name.to_string(), WeatherStation::new(station_name, temp) );
+                weather_stations.insert(station_name.to_string(), WeatherStation::new(temp) );
             } else {
                 weather_stations.get_mut(station_name).unwrap().add_temp(temp);
             }
         }
     }
-
     weather_stations
 }
 
 pub fn print_stations(stations: &BTreeMap<String, WeatherStation>){
+    let mut stations_vec = stations.into_iter().collect::<Vec<_>>();
+    stations_vec.sort_unstable_by_key(|p| p.0);
     print!("{{");
-    let mut is_first = true;
-    for station in stations.values() {
-        if is_first {
-            print!("{station}");
-            is_first = false;
-        } else {
-            print!(", {station}");
-        }
+    for (station_name, data) in stations_vec {
+        println!("{station_name}: {:.1}/{:.1}/{:.1}", data.min, data.get_mean(), data.max);
     }
     println!("}}");
 }
